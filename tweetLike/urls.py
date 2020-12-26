@@ -13,9 +13,36 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path
+from django.urls import path,include,re_path
+from accounts.views import(
+login_view,
+logout_view,
+register_view,
+)
+from tweets.views import (
+tweets_detail_view,
+tweets_list_view,
 
+)
+from django.views.generic import TemplateView
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin/',admin.site.urls),
+    path('login/', login_view),
+    path('logout/', logout_view),
+    path('register/', register_view),
+    path('', tweets_list_view),
+    path('<int:tweet_id>/',tweets_detail_view),
+
+    re_path(r'profiles?/',include('profiles.urls')),
+    #path('api/tweets/<str:tweet_id>/delete',tweet_delete_view),
+    #path('api/tweets/action',tweet_action_view),
+    path('api/tweets/',include('tweets.api.urls')),
+    re_path(r'api/profiles?/',include('profiles.api.urls')),
+
+
 ]
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

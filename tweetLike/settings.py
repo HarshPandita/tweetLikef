@@ -26,6 +26,7 @@ SECRET_KEY = 'm&pn)q**utu=oy#3&v#wht7dwvld0zqx0bo_vpsh!!jm%-n)@z'
 DEBUG = True
 
 ALLOWED_HOSTS = []
+LOGIN_URL='/login'
 
 
 # Application definition
@@ -37,24 +38,32 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'tweets',
+    'rest_framework',
+    'corsheaders',
+    'accounts',
+    'profiles',
 ]
+MAXTLENGTH=200
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
+CORS_ALLOW_CREDENTIALS = True
+CORS_ORIGIN_ALLOW_ALL = True
 ROOT_URLCONF = 'tweetLike.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR,"templates")],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -79,8 +88,34 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
+from corsheaders.defaults import default_headers
+
+CORS_ALLOW_HEADERS = default_headers + (
+    'Access-Control-Allow-Origin',
+)
 
 
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'http_x_requested_with',
+
+]
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 
@@ -117,4 +152,29 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
+DEFAULT_RENDERER_CLASSES=['rest_framework.renderers.JSONRenderer',]
+
+
+DEFAULT_AUTHENTICATION_CLASSES=['rest_framework.authentication.SessionAuthentication','rest_framework.authentication.TokenAuthentication',]
+
+if DEBUG:
+    DEFAULT_RENDERER_CLASSES +=   ['rest_framework.renderers.BrowsableAPIRenderer',]
+    DEFAULT_AUTHENTICATION_CLASSES +=['tweetLike.rest_api.dev.DevAuthentication',]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES':DEFAULT_AUTHENTICATION_CLASSES,
+    'DEFAULT_RENDERER_CLASSES':DEFAULT_RENDERER_CLASSES,
+
+}
+
+
+APPEND_SLASH=False
+TWEET_ACTION_OPTIONS=['like','unlike','retweet']
+
 STATIC_URL = '/static/'
+STATICFILES_DIRS=[
+os.path.join(BASE_DIR,"static"),
+]
+STATIC_ROOT=os.path.join(BASE_DIR,"static-root")
+CORS_ALLOW_ALL_ORIGINS=True
+CORS_URLS_REGEX=r'^/api/.*$'
